@@ -34,32 +34,32 @@ def start(req: func.HttpRequest) -> func.HttpResponse:
           status_code=response.status)
 
 
-@app.function_name(name="headers")
-@app.route(route="headers")
-@app.service_bus_topic_output(arg_name="message", connection="ServiceBusConnection", queue_name="new")
-def headers(req: func.HttpRequest, message: func.Out[str]) -> func.HttpResponse:
-    logging.info('[headers] Python HTTP trigger function processed a request.')
+# @app.function_name(name="headers")
+# @app.route(route="headers")
+# @app.service_bus_topic_output(arg_name="message", connection="ServiceBusConnection", queue_name="new")
+# def headers(req: func.HttpRequest, message: func.Out[str]) -> func.HttpResponse:
+#     logging.info('[headers] Python HTTP trigger function processed a request.')
 
-    headersAsDict = dict(req.headers)
-    wrapper = {
-        "source": 'headers',
-        "headers": headersAsDict
-    }
+#     headersAsDict = dict(req.headers)
+#     wrapper = {
+#         "source": 'headers',
+#         "headers": headersAsDict
+#     }
 
-    headersAsStr = json.dumps(wrapper, indent=2)
-    logging.info(headersAsStr)
-    message.set(headersAsStr)
+#     headersAsStr = json.dumps(wrapper, indent=2)
+#     logging.info(headersAsStr)
+#     message.set(headersAsStr)
 
-    return func.HttpResponse(
-            headersAsStr,
-            mimetype="application/json",
-            status_code=200
-    )
+#     return func.HttpResponse(
+#             headersAsStr,
+#             mimetype="application/json",
+#             status_code=200
+#     )
 
-@app.function_name(name="dequeue")
-@app.route(route="dequeue")
-@app.service_bus_queue_trigger(arg_name="msg", queue_name="new", connection="ServiceBusConnection")
-def dequeue(msg: func.ServiceBusMessage) -> None:
-    logging.info('[dequeue] Python ServiceBus queue trigger function processed a request.')
-    logging.info('Python ServiceBus queue trigger processed message: %s',
-                 msg.get_body().decode('utf-8'))
+# @app.function_name(name="dequeue")
+# @app.route(route="dequeue")
+# @app.service_bus_queue_trigger(arg_name="msg", queue_name="new", connection="ServiceBusConnection")
+# def dequeue(msg: func.ServiceBusMessage) -> None:
+#     logging.info('[dequeue] Python ServiceBus queue trigger function processed a request.')
+#     logging.info('Python ServiceBus queue trigger processed message: %s',
+#                  msg.get_body().decode('utf-8'))
