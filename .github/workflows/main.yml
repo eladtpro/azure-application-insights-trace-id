@@ -1,5 +1,5 @@
 name: Deploy Python project to Azure Function App
-
+# 'Build and deploy Python project to Azure Function App. https://learn.microsoft.com/en-us/azure/azure-functions/functions-how-to-github-actions?tabs=linux%2Cpython&pivots=method-manual'
 on:
   [push]
 
