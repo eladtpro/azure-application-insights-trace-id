@@ -36,9 +36,9 @@ def start(req: func.HttpRequest) -> func.HttpResponse:
 
 @app.function_name(name="headers")
 @app.route(route="headers")
-# @app.service_bus_topic_output(arg_name="message", connection="ServiceBusConnection", queue_name="new")
+@app.service_bus_topic_output(arg_name="message", connection="ServiceBusConnection", queue_name="new")
 def headers(req: func.HttpRequest
-            #   , message: func.Out[str]
+           , message: func.Out[str]
             ) -> func.HttpResponse:
     logging.info('[headers] Python HTTP trigger function processed a request.')
 
