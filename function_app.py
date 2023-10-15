@@ -23,6 +23,7 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 @app.function_name(name="start")
 @app.route(route="start")
 def start(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
+    logging.info(f'START')
     logging.info(f'[start] Python HTTP trigger function processed a request. next url')
     log_request(req, context)
     url_parts = urlparse(req.url)
@@ -84,6 +85,7 @@ def enqueue(req: func.HttpRequest, context: func.Context, message: func.Out[str]
 def dequeue(msg: func.ServiceBusMessage) -> None:
     logging.info('[dequeue] Python ServiceBus queue trigger function processed a request.')
     logging.info('Python ServiceBus queue trigger processed message: %s', msg.get_body().decode('utf-8'))
+    logging.info(f'END')
 
 
 def log_request(req: func.HttpRequest, context: func.Context) -> str:
