@@ -2,63 +2,95 @@ import azure.functions as func
 import logging
 import json
 import http.client
+from datetime import datetime
+from urllib.parse import urlparse
 
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 @app.function_name(name="start")
 @app.route(route="start")
-def start(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('[start] Python HTTP trigger function processed a request.')
-    # url = 'https://func-azure-monitor.azurewebsites.net/api/headers'
+def start(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
+    logging.info(f'[start] Python HTTP trigger function processed a request. next url')
+    log_request(req, context)
+    url_parts = urlparse(req.url)
+    if url_parts.scheme == 'http':
+        connection = http.client.HTTPConnection(url_parts.netloc)
+    elif url_parts.scheme == 'https':
+        connection = http.client.HTTPSConnection(url_parts.netloc) # connection = http.client.HTTPSConnection('func-azure-monitor.azurewebsites.net')
+    else:
+        error = f'Error: {url_parts.scheme} is not supported'
+        logging.error(error)
+        return func.HttpResponse(error, status_code=400)
+
     headers = dict(req.headers)
     headers['Content-type'] = 'application/json'
+    
     if 'trace-id' not in headers:
-        headers['trace-id'] = req.params.get('correlation-id') or headers.get('x-operation-id') or '12345678-9ABC-1234-5678-9ABCDEFGHIJK'
+        time_string = datetime.now().strftime('HH%HMM%MSS%S')
 
-    connection = http.client.HTTPSConnection('func-azure-monitor.azurewebsites.net')
-    connection.request('GET', '/api/headers', headers=headers)    
+        headers['parent-id'] = headers['trace-id'] = f'12345678-9ABC-1234-5678-{time_string}'
+        # headers['trace-id'] = req.params.get('correlation-id') or headers.get('x-operation-id') or '12345678-9ABC-1234-5678-9ABCDEFGHIJK'
+        # headers['x-operation-id'] = headers['trace-id']
 
+
+    connection.request('GET', '/api/enqueue', headers=headers)    
     response = connection.getresponse()
-    if response.status == 200:
+
+    if response.status >= 200 and response.status < 300 :
         res = response.read().decode()
         logging.info(res)        
-        return func.HttpResponse(
-                res,
-                mimetype="application/json",
-                status_code=200)
     else:
-        logging.error(headers)
-        return func.HttpResponse(
-          f'[start] Error: {response.status} - {response.reason}',
-          status_code=response.status)
+        res =  json.dumps({error: f'[start] {response.status} - {response.reason}'}, indent=2)
+        logging.error(res)
+    
+    return func.HttpResponse(
+            res,
+            mimetype="application/json",
+            status_code=response.status)
+    
 
-@app.function_name(name="headers")
-@app.route(route="headers")
+@app.function_name(name="enqueue")
+@app.route(route="enqueue")
 @app.service_bus_queue_output(arg_name="message", connection="ServiceBusConnection", queue_name="new")
-def headers(req: func.HttpRequest, message: func.Out[str]) -> func.HttpResponse:
-    logging.info('[headers] Python HTTP trigger function processed a request.')
-
-    headersAsDict = dict(req.headers)
-    wrapper = {
-        "source": 'headers',
-        "headers": headersAsDict
-    }
-
-    headersAsStr = json.dumps(wrapper, indent=2)
-    logging.info(headersAsStr)
-    message.set(headersAsStr)
+def enqueue(req: func.HttpRequest, context: func.Context, message: func.Out[str]) -> func.HttpResponse:
+    logging.info('[enqueue] Python HTTP trigger function processed a request.')
+    log_entry = log_request(req, context)
+    message.set(log_entry)
 
     return func.HttpResponse(
-            headersAsStr,
+            log_entry,
             mimetype="application/json",
             status_code=200
     )
 
 @app.function_name(name="dequeue")
-@app.service_bus_queue_trigger(arg_name="msg", queue_name="new", connection="ServiceBusConnection")
+@app.service_bus_queue_trigger(arg_name="msg", connection="ServiceBusConnection", queue_name="new")
 def dequeue(msg: func.ServiceBusMessage) -> None:
     logging.info('[dequeue] Python ServiceBus queue trigger function processed a request.')
-    logging.info('Python ServiceBus queue trigger processed message: %s',
-                 msg.get_body().decode('utf-8'))
+    logging.info('Python ServiceBus queue trigger processed message: %s', msg.get_body().decode('utf-8'))
 
+
+def log_request(req: func.HttpRequest, context: func.Context) -> str:
+    dict_headers = dict(req.headers)
+    trace_data = {
+        'ctx_func_dir': context.function_directory,
+        'ctx_invocation_id': context.invocation_id,
+        'ctx_trace_context_Traceparent': context.trace_context.Traceparent,
+        'ctx_trace_context_Tracestate': context.trace_context.Tracestate,
+        'ctx_retry_context_RetryCount': context.retry_context.retry_count,
+        'ctx_retry_context_MaxRetryCount': context.retry_context.max_retry_count,
+    }
+
+    wrapper = {
+        'ctx_func_name': context.function_name or 'NO_FUNC_NAME',
+        'method': req.method or 'NO_METHOD',
+        "route_params": req.route_params or {},
+        "params": req.params or {},
+        "headers": dict_headers or {},
+        "trace": trace_data or {},
+    }
+
+    log_entry = json.dumps(wrapper, indent=2)
+    logging.info(log_entry)
+    return log_entry
