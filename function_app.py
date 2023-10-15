@@ -2,9 +2,21 @@ import azure.functions as func
 import logging
 import json
 import http.client
+import os
 from datetime import datetime
 from urllib.parse import urlparse
+from azure.monitor.opentelemetry import configure_azure_monitor
+from opentelemetry import trace, metrics, propagators, context
 
+
+configure_azure_monitor(
+    connection_string=os.environ['OPEN_TELEMETRY_CONNECTION_STRING'],
+)
+
+# Get a tracer for the current module.
+tracer = trace.get_tracer(__name__)
+with tracer.start_as_current_span("test"):
+    print("Hello world from OpenTelemetry Python!")
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
