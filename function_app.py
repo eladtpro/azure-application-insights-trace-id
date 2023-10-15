@@ -23,7 +23,6 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 @app.function_name(name="start")
 @app.route(route="start")
 def start(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
-    logging.info(f'START')
     logging.info(f'[start] Python HTTP trigger function processed a request. next url')
     log_request(req, context)
     url_parts = urlparse(req.url)
@@ -49,6 +48,7 @@ def start(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
         # headers['trace-id'] = req.params.get('correlation-id') or headers.get('x-operation-id') or '12345678-9ABC-1234-5678-9ABCDEFGHIJK'
         # headers['x-operation-id'] = headers['trace-id']
 
+    logging.info(f'START: {headers["trace-id"]}')
 
     connection.request('GET', '/api/enqueue', headers=headers)    
     response = connection.getresponse()
@@ -85,7 +85,11 @@ def enqueue(req: func.HttpRequest, context: func.Context, message: func.Out[str]
 def dequeue(msg: func.ServiceBusMessage) -> None:
     logging.info('[dequeue] Python ServiceBus queue trigger function processed a request.')
     logging.info('Python ServiceBus queue trigger processed message: %s', msg.get_body().decode('utf-8'))
-    logging.info(f'END')
+    obj = json.loads(msg.get_body().decode('utf-8'))
+    trace_id = 'UNKNOWN'
+    if 'trace-id' in obj['headers']:
+        trace_id = obj['headers']['trace-id']
+    logging.info(f'END: {trace_id}')
 
 
 def log_request(req: func.HttpRequest, context: func.Context) -> str:
