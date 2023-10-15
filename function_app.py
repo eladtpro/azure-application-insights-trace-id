@@ -24,6 +24,9 @@ def start(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
         return func.HttpResponse(error, status_code=400)
 
     headers = dict(req.headers)
+    # remove auth headers
+    if 'authorization' in headers:
+        del headers['authorization']
     headers['Content-type'] = 'application/json'
     
     if 'trace-id' not in headers:
