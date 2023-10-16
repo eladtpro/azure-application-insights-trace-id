@@ -4,7 +4,7 @@ import json
 import http.client
 from datetime import datetime
 from urllib.parse import urlparse
-from opentelemetry import trace
+# from opentelemetry import trace
 # import os
 # from azure.monitor.opentelemetry import configure_azure_monitor
 # configure_azure_monitor(
@@ -26,7 +26,7 @@ def start(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
     logging.info(f'[start] Python HTTP trigger function processed a request. next url')
     log_request(req, context)
     connection, headers = get_connection(req.url, dict(req.headers))
-    logging.info(f'START: {headers["trace-id"]}')
+    logging.info(f'START: {headers["traceparent"]}')
     connection.request('GET', '/api/enqueue', headers=headers)    
     res =  connection.getresponse()
 
@@ -70,7 +70,7 @@ def dequeue(msg: func.ServiceBusMessage) -> None:
 def end(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
     logging.info('[end] Python HTTP trigger function processed a request.')
     log_request(req, context)
-    logging.info(f'END: {req.headers["trace-id"]}')
+    logging.info(f'END: {req.headers["traceparent"]}')
 
     return func.HttpResponse(
             "END",

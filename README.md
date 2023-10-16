@@ -8,27 +8,15 @@
 
 ## Functions
 
-The code file defines an Azure Function App that consists of four functions that handle HTTP requests:
+The code file defines an Azure Function App that consists of four functions that handle HTTP requests:  
 
-***start***: This function is triggered by an HTTP request with the route /start. It logs the request and then makes a GET request to another endpoint with the same headers.
+***start***: This function is triggered by an HTTP request with the route /start. It logs the request and then makes a GET request to another endpoint with the same headers.  
 
-***enqueue***: This function is triggered by an HTTP request with the route /enqueue. It logs the request and then sends a message to an Azure Service Bus queue.
+***enqueue***: This function is triggered by an HTTP request with the route /enqueue. It logs the request and then sends a message to an Azure Service Bus queue.  
 
-***dequeue***: This function is triggered by a message in an Azure Service Bus queue. It logs the message and then makes a POST request to another endpoint with the same headers.
+***dequeue***: This function is triggered by a message in an Azure Service Bus queue. It logs the message and then makes a POST request to another endpoint with the same headers.  
 
-***end***: This function is triggered by an HTTP request with the route /end. It logs the request and returns a HTTP response with the body "END".
-
-Helper Functions
-The code file also defines three helper functions:
-
-***get_connection***: This function takes a URL and a dictionary of headers as input, and returns an http.client.HTTPConnection or http.client.HTTPSConnection object depending on the scheme of the URL. It also adds a trace-id header to the headers dictionary if one is not already present.
-
-***log_request***: This function takes an HttpRequest object and a Context object as input, and returns a JSON string that contains information about the request and context.
-
-***configure_azure_monitor***: This function is commented out in the code file, it's a function that configures Azure Monitor for OpenTelemetry.
-
-HT
-tracer
+***end***: This function is triggered by an HTTP request with the route /end. It logs the request and returns a HTTP response with the body "END".  
 
 
 ![W3C](assets/W3C_Icon.svg.png)
