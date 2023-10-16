@@ -62,7 +62,9 @@ def dequeue(msg: func.ServiceBusMessage) -> None:
     connection, headers = get_connection(obj['url'], obj['headers'])
 
     connection.request('POST', '/api/end', headers=headers, body=msg.get_body().decode('utf-8'))    
-    return connection.getresponse()
+    response = connection.getresponse()
+    logging.info(f'DEQUEUE: {headers["traceparent"], response.status, response.reason}')
+    logging.info(f'DEQUEUE: {response.read().decode("utf-8")}')
 
 
 @app.function_name(name="end")
