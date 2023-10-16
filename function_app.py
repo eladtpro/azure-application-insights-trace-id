@@ -99,7 +99,8 @@ def get_connection(url: str, headers: dict) -> http.client.HTTPConnection or htt
     # HACK: create generator function thats creates trace-id
     # traceparent = f'00-{datetime.now().strftime("%Y%m%d%H%M%S%f")}-b4b37b64bb3f6141-00'
     if 'traceparent' not in headers:
-        headers['traceparent'] = '00-480e22a2781fe54d992d878662248d94-b4b37b64bb3f6141-00'
+        raise Exception('traceparent header not found')
+    #     headers['traceparent'] = '00-480e22a2781fe54d992d878662248d94-b4b37b64bb3f6141-00'
 
     return connection, headers
     

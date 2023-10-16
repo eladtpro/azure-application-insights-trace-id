@@ -60,7 +60,13 @@ The ***traceparent*** field uses the Augmented Backus-Naur Form (ABNF) notation 
 
 ---
 
+## Test
 
+##### Trace Headers
+***traceparent***: 00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01
+***tracestate***: rojo=00f067aa0ba902b7,congo=t61rcWkgMzE
+
+`https://<your-func>.azurewebsites.net`
 
 ***Redis UPGRADE*** Delete later
 [Limitations](https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-how-to-upgrade)
