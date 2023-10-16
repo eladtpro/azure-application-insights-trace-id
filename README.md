@@ -1,13 +1,36 @@
-![Azure Application Insights](assets/Application-Insights-1366x768.png)
+![Azure Application Insights](assets/application-insights-wide.png)
 
-# Distributed trace in action
-#### Azure APM Application Insights Service end-to-end transactions:
-
-
-![Flow](assets/application_insights.png)
+# Distributed tracing in action
 
 
-## Functions
+## Distributed tracing
+In this architecture, the system is a chain of microservices. Each microservice can fail independently for various reasons. When that happens, it's important to understand what happened so you can troubleshoot. It’s helpful to isolate an end-to-end transaction and follow the journey through the app stack, which consists of services or microservices. This method is called ***distributed tracing***.  
+
+
+***span***, A span represents a single operation in a ***trace***. A span could be representative of an HTTP request, a remote procedure call (RPC), a database query, or even the path that a code takes in user code, etc. 
+
+
+---
+
+
+## Scenario  
+
+![Flow](assets/flow.png)
+Azure APM Application Insights Service end-to-end transactions
+
+
+#### Azure Resources: 
+Functions, Service Bus queue, Applciation Insights, and Log Analytics Workspace
+
+***Azure Function Service***: Azure Functions is an event-driven, serverless compute platform that helps you develop more efficiently using the programming language of your choice. Focus on core business logic with the highest level of hardware abstraction.  
+
+***Azure Service Bus queue service***: Queues offer First In, First Out (FIFO) message delivery to one or more competing consumers. That is, receivers typically receive and process messages in the order in which they were added to the queue. And, only one message consumer receives and processes each message.  
+
+***Azure Monitor Application Insights***: Azure Monitor Application Insights, Application Performance Monitoring (APM) subsystem, a feature of Azure Monitor, excels in Application Performance Management (APM) for live web applications.  
+
+***Azure Log Analytics Workspace***: A Log Analytics workspace is a unique environment for log data from Azure Monitor and other Azure services, such as Microsoft Sentinel and Application Insights. Each workspace has its own data repository and configuration but might combine data from multiple services.  
+
+#### The Flow
 
 The code file defines an Azure Function App that consists of four functions that handle both Service Bus queues and HTTP requests:  
 
@@ -20,7 +43,26 @@ The code file defines an Azure Function App that consists of four functions that
 ***end***: This function is triggered by an HTTP request with the route /end. It logs the request and returns a HTTP response with the body "END".  
 
 
-![W3C](assets/W3C_Icon.svg.png)
+#### End-to-end transaction view
+![End to End Transaction](assets/end2end-tx.png)
+
+
+
+---
+
+
+## Test
+
+##### Trace Headers
+***traceparent***: `00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01`
+***tracestate***: `rojo=00f067aa0ba902b7,congo=t61rcWkgMzE`
+
+`https://<your-func>.azurewebsites.net`
+
+
+---
+
+![W3C](assets/W3C-World-Wide-Web.png)
 ## Trace Context
 
 
@@ -60,22 +102,6 @@ The ***traceparent*** field uses the Augmented Backus-Naur Form (ABNF) notation 
 
 ---
 
-## Test
-
-##### Trace Headers
-***traceparent***: `00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01`
-***tracestate***: `rojo=00f067aa0ba902b7,congo=t61rcWkgMzE`
-
-`https://<your-func>.azurewebsites.net`
-
-***Redis UPGRADE*** Delete later
-[Limitations](https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-how-to-upgrade)
-Cache unavaiable for period - on basic tier
-Old cached with dependency to Cloud Services - not supported
-Upgrade from 4 to 6 must be test in duplicated env
-[Misconfigurations](https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-how-to-premium-vnet#what-are-some-common-misconfiguration-issues-with-azure-cache-for-redis-and-virtual-networks)
-
-
 
 # azure-application-insights-trace-id
 python trace-id/operation-id correlation test
@@ -87,3 +113,26 @@ python trace-id/operation-id correlation test
 [Tutorial: Use identity-based connections instead of secrets with triggers and bindings](https://learn.microsoft.com/en-us/azure/azure-functions/functions-identity-based-connections-tutorial-2)
 
 [host.json settings](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus?tabs=isolated-process%2Cfunctionsv2%2Cextensionv3&pivots=programming-language-python#hostjson-settings)
+
+
+---
+
+## Further Reading
+
+[Monitor a distributed system by using Application Insights and OpenCensus](https://learn.microsoft.com/en-us/azure/architecture/guide/devops/monitor-with-opencensus-application-insights)
+<sub>This article describes a distributed system that's created with Azure Functions, Azure Event Hubs, and Azure Service Bus. It provides details about how to monitor the end-to-end system by using [OpenCensus for Python](https://github.com/census-instrumentation/opencensus-python) and Application Insights. This article also introduces distributed tracing and explains how it works by using Python code examples. The fictional company, Contoso, is used in the architecture to help describe the scenario.</sub>
+
+
+
+
+
+
+---
+
+***Redis UPGRADE*** Delete later
+[Limitations](https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-how-to-upgrade)
+Cache unavaiable for period - on basic tier
+Old cached with dependency to Cloud Services - not supported
+Upgrade from 4 to 6 must be test in duplicated env
+[Misconfigurations](https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-how-to-premium-vnet#what-are-some-common-misconfiguration-issues-with-azure-cache-for-redis-and-virtual-networks)
+
