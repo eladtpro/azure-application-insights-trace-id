@@ -96,12 +96,11 @@ def get_connection(url: str, headers: dict) -> http.client.HTTPConnection or htt
         del headers['authorization']
     headers['Content-type'] = 'application/json'
     
-    if 'trace-id' not in headers:
-        time_string = datetime.now().strftime('HH%HMM%MSS%S')
-        headers['parent-id'] = headers['trace-id'] = f'12345678-9ABC-1234-5678-{time_string}'
-        # headers['trace-id'] = req.params.get('correlation-id') or headers.get('x-operation-id')
-        # or '12345678-9ABC-1234-5678-9ABCDEFGHIJK'
-        # headers['x-operation-id'] = headers['trace-id']
+    # HACK: create generator function thats creates trace-id
+    # traceparent = f'00-{datetime.now().strftime("%Y%m%d%H%M%S%f")}-b4b37b64bb3f6141-00'
+    if 'traceparent' not in headers:
+        headers['traceparent'] = '00-480e22a2781fe54d992d878662248d94-b4b37b64bb3f6141-00'
+
     return connection, headers
     
 
