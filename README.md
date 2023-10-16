@@ -1,6 +1,7 @@
 ![Azure Application Insights](assets/Application-Insights-1366x768.png)
 
-# Azure APM Application Insights Service end-to-end transactions:
+# Distributed trace in action
+#### Azure APM Application Insights Service end-to-end transactions:
 
 
 ![Flow](assets/application_insights.png)
@@ -8,7 +9,7 @@
 
 ## Functions
 
-The code file defines an Azure Function App that consists of four functions that handle HTTP requests:  
+The code file defines an Azure Function App that consists of four functions that handle both Service Bus queues and HTTP requests:  
 
 ***start***: This function is triggered by an HTTP request with the route /start. It logs the request and then makes a GET request to another endpoint with the same headers.  
 
@@ -23,10 +24,17 @@ The code file defines an Azure Function App that consists of four functions that
 ## Trace Context
 
 
+> ***Distributed tracing*** is a methodology implemented by tracing tools to follow, analyze and debug a transaction across multiple software components. Typically, a [*distributed trace*](#distrace) traverses more than one component which requires it to be uniquely identifiable across all participating systems. Trace context propagation passes along this unique identification.
+
+
+> <a name="distrace"></a> ***Distributed trace***, A distributed trace is a set of events, triggered as a result of a single logical operation, consolidated across various components of an application. A distributed trace contains events that cross process, network and security boundaries. A distributed trace may be initiated when someone presses a button to start an action on a website - in this example, the trace will represent calls made between the downstream services that handled the chain of requests initiated by this button being pressed.
+
+
 ### The trace context standard
 The [W3C Trace Context](https://www.w3.org/TR/trace-context/) specification defines a standard to HTTP headers and formats to propagate the distributed tracing context information. It defines two fields that should be propagated in the http request's header throughout the trace flow. Take a look below at the standard definition of each field:
 
-* ***traceparent***: identifier responsible to describe the incoming request position in its trace graph. It represents a common format of the incoming request in a tracing system, understood by all vendors.
+* ***traceparent***: ***traceparent*** describes the position of the incoming request in its trace graph in a portable, fixed-length format. Its design focuses on fast parsing. Every tracing tool MUST properly set ***traceparent*** even when it only relies on vendor-specific information in tracestate
+
 
 * ***tracestate***: extends traceparent with vendor-specific data represented by a set of name/value pairs. Storing information in tracestate is optional.
 
@@ -43,7 +51,7 @@ The ***traceparent*** field uses the Augmented Backus-Naur Form (ABNF) notation 
 
 ***trace-id*** (16-byte array): the ID of the whole trace. It's used to identify a distributed trace globally through a system.
 
-***parent-id*** / span-id (8-byte array): used to identify the parent of the current span on incoming requests or the current span on an outgoing request.
+***parent-id*** parent-id/span-id (8-byte array): used to identify the parent of the current span on incoming requests or the current span on an outgoing request.
 
 ***trace-flags*** (8-bit): flags that represent recommendations of the caller. Can be also thought as the caller recommendations and are strict to three reasons: trust and abuse, bug in the caller or different load between caller and callee service.
 
