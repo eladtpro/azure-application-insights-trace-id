@@ -1,13 +1,19 @@
 ![Azure Application Insights](assets/application-insights-wide.png)
 
-# Distributed tracing in action
+# Distributed tracing in action (a.k.a trace-context propagation)
 
 
-## Distributed tracing
+## Distributed tracing  
 In this architecture, the system is a chain of microservices. Each microservice can fail independently for various reasons. When that happens, it's important to understand what happened so you can troubleshoot. It’s helpful to isolate an end-to-end transaction and follow the journey through the app stack, which consists of services or microservices. This method is called ***distributed tracing***.  
 
+***Tracing***, Tracing tracks the progression of a single user request as it is handled by other services that make up an application.  
+Each unit work is called a ***span*** in a ***trace***. Spans include metadata about the work, including the time spent in the step (latency), status, time events, attributes, links. You can use tracing to debug errors and latency issues in your applications.  
 
-***span***, A span represents a single operation in a ***trace***. A span could be representative of an HTTP request, a remote procedure call (RPC), a database query, or even the path that a code takes in user code, etc. 
+***trace***, A ***trace*** is a tree of ***spans***. It is a collective of observable signals showing the path of work through a system. A ***trace*** on its own is distinguishable by a unique 16 byte sequence called a `trace-id`.
+
+***span***, A span represents a single operation in a ***trace***. A span could be representative of an HTTP request, a remote procedure call (RPC), a database query, or even the path that a code takes in user code, etc. A ***span*** on its own is distinguishable by a unique 8 byte sequence called a `span-id` or `parent-id`.    
+
+![Trace](assets/trace-example.png)
 
 
 ---
@@ -15,7 +21,6 @@ In this architecture, the system is a chain of microservices. Each microservice 
 
 ## Scenario  
 
-![Flow](assets/flow.png)
 Azure APM Application Insights Service end-to-end transactions
 
 
@@ -29,6 +34,10 @@ Functions, Service Bus queue, Applciation Insights, and Log Analytics Workspace
 ***Azure Monitor Application Insights***: Azure Monitor Application Insights, Application Performance Monitoring (APM) subsystem, a feature of Azure Monitor, excels in Application Performance Management (APM) for live web applications.  
 
 ***Azure Log Analytics Workspace***: A Log Analytics workspace is a unique environment for log data from Azure Monitor and other Azure services, such as Microsoft Sentinel and Application Insights. Each workspace has its own data repository and configuration but might combine data from multiple services.  
+
+
+![Flow](assets/flow.png)
+
 
 #### The Flow
 
@@ -84,7 +93,7 @@ The [W3C Trace Context](https://www.w3.org/TR/trace-context/) specification defi
 The ***traceparent*** field uses the Augmented Backus-Naur Form (ABNF) notation of [RFC5234](https://www.w3.org/TR/trace-context/#bib-rfc5234) and is composed by 4 sub-fields:
 
 ```
-# version - traceid - parentid/spanid - traceflags
+# version - trace-id - parent-id/span-id - traceflags
 
 00-480e22a2781fe54d992d878662248d94-b4b37b64bb3f6141-00
 ```
@@ -93,7 +102,7 @@ The ***traceparent*** field uses the Augmented Backus-Naur Form (ABNF) notation 
 
 ***trace-id*** (16-byte array): the ID of the whole trace. It's used to identify a distributed trace globally through a system.
 
-***parent-id*** parent-id/span-id (8-byte array): used to identify the parent of the current span on incoming requests or the current span on an outgoing request.
+***parent-id*** or ***span-id*** (8-byte array): used to identify the parent of the current span on incoming requests or the current span on an outgoing request.
 
 ***trace-flags*** (8-bit): flags that represent recommendations of the caller. Can be also thought as the caller recommendations and are strict to three reasons: trust and abuse, bug in the caller or different load between caller and callee service.
 
@@ -103,8 +112,12 @@ The ***traceparent*** field uses the Augmented Backus-Naur Form (ABNF) notation 
 ---
 
 
-# azure-application-insights-trace-id
-python trace-id/operation-id correlation test
+## Further Reading
+
+##### Microsoft learn
+
+[Application Insights overview](https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview)
+<sub>Azure Monitor Application Insights, a feature of [Azure Monitor](https://learn.microsoft.com/en-us/azure/azure-monitor/overview), excels in Application Performance Management (APM) for live web applications.</sub>
 
 
 [Azure Service Bus output binding for Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus-output?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cextensionv5&pivots=programming-language-python)
@@ -114,25 +127,38 @@ python trace-id/operation-id correlation test
 
 [host.json settings](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus?tabs=isolated-process%2Cfunctionsv2%2Cextensionv3&pivots=programming-language-python#hostjson-settings)
 
+[Monitor a distributed system by using Application Insights and OpenCensus](https://learn.microsoft.com/en-us/azure/architecture/guide/devops/monitor-with-opencensus-application-insights)
+<sub>This article describes a distributed system that's created with Azure Functions, Azure Event Hubs, and Azure Service Bus. It provides details about how to monitor the end-to-end system by using [OpenCensus for Python](https://github.com/census-instrumentation/opencensus-python) and Application Insights. This article also introduces distributed tracing and explains how it works by using Python code examples. The fictional company, Contoso, is used in the architecture to help describe the scenario.</sub>
 
----
+[Log Analytics workspace overview](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-workspace-overview)
+<sub>A Log Analytics workspace is a unique environment for log data from Azure Monitor and other Azure services, such as Microsoft Sentinel and Microsoft Defender for Cloud. Each workspace has its own data repository and configuration but might combine data from multiple services.</sub>
 
-## Further Reading
+##### Azure
+
+[Azure Service Bus output binding for Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus-output?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cextensionv5&pivots=programming-language-python)
+
+
+[Azure Functions Python developer guide](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=asgi%2Capplication-level&pivots=python-mode-decorators)
+<sub>This guide is an introduction to developing Azure Functions by using Python.</sub>
+
+##### W3C  
+
+[W3C Trace Context](https://www.w3.org/TR/trace-context/#trace-id)
+
+
+##### Python and 3rd Party
+[OpenCensus - Tracing](https://opencensus.io/tracing/)
+<sub>Tracing tracks the progression of a single user request as it is handled by other services that make up an application.</sub>
 
 [Monitor a distributed system by using Application Insights and OpenCensus](https://learn.microsoft.com/en-us/azure/architecture/guide/devops/monitor-with-opencensus-application-insights)
 <sub>This article describes a distributed system that's created with Azure Functions, Azure Event Hubs, and Azure Service Bus. It provides details about how to monitor the end-to-end system by using [OpenCensus for Python](https://github.com/census-instrumentation/opencensus-python) and Application Insights. This article also introduces distributed tracing and explains how it works by using Python code examples. The fictional company, Contoso, is used in the architecture to help describe the scenario.</sub>
 
+[OpenTelemetry Python](https://github.com/open-telemetry/opentelemetry-python)
+
+[Lelis Dev - trace context](https://luizlelis.com/blog/tracecontext)
+<sub>Using W3C Trace Context standard in distributed tracing</sub>
 
 
 
 
-
----
-
-***Redis UPGRADE*** Delete later
-[Limitations](https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-how-to-upgrade)
-Cache unavaiable for period - on basic tier
-Old cached with dependency to Cloud Services - not supported
-Upgrade from 4 to 6 must be test in duplicated env
-[Misconfigurations](https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-how-to-premium-vnet#what-are-some-common-misconfiguration-issues-with-azure-cache-for-redis-and-virtual-networks)
 

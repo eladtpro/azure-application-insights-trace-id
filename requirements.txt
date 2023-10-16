@@ -4,4 +4,13 @@
 
 azure-functions
 azure-servicebus
-azure-monitor-opentelemetry
+
+# opentelemetry-api
+# opentelemetry.sdk
+# opentelemetry-exporter-opencensus
+# azure-monitor-opentelemetry
+
+
+# pip install -e ./opentelemetry-api
+# pip install -e ./opentelemetry-sdk
+# pip install -e ./instrumentation/opentelemetry-instrumentation-{instrumentation}

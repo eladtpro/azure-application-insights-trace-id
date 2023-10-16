@@ -4,17 +4,34 @@ import json
 import http.client
 from datetime import datetime
 from urllib.parse import urlparse
-# from opentelemetry import trace
 # import os
 # from azure.monitor.opentelemetry import configure_azure_monitor
+# from opentelemetry import trace
+# from opentelemetry.sdk.trace import TracerProvider
+# from opentelemetry.sdk.trace.export import (BatchSpanProcessor, ConsoleSpanExporter)
+# from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+
+
 # configure_azure_monitor(
 #     connection_string=os.environ['OPEN_TELEMETRY_CONNECTION_STRING'],
 # )
 
-# # Get a tracer for the current module.
+# trace.set_tracer_provider(TracerProvider())
+# trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
+
 # tracer = trace.get_tracer(__name__)
-# with tracer.start_as_current_span("test"):
-#     print("Hello world from OpenTelemetry Python!")
+# prop = TraceContextTextMapPropagator()
+# carrier = {}
+
+# # Injecting the context into carrier and send it over
+# with tracer.start_as_current_span("first-span") as span:
+#     prop.inject(carrier=carrier)
+#     print("Carrier after injecting span context", carrier)
+
+# # Extracting the remote context from carrier and starting a new span under same trace.
+# ctx = prop.extract(carrier=carrier)
+# with tracer.start_as_current_span("next-span", context=ctx):
+#     pass
 
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
