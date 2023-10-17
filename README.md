@@ -4,7 +4,7 @@
 
 
 ## Distributed tracing  
-In this architecture, the system is a chain of microservices. Each microservice can fail independently for various reasons. When that happens, it's important to understand what happened so you can troubleshoot. It’s helpful to isolate an end-to-end transaction and follow the journey through the app stack, which consists of services or microservices. This method is called ***distributed tracing***.  
+In this architecture, **the system is a chain of microservices**. Each microservice can fail independently for various reasons. When that happens, it's important to understand what happened so you can troubleshoot. It’s helpful to isolate an end-to-end transaction and follow the journey through the app stack, which consists of services or microservices. This method is called ***distributed tracing***.  
 
 ***Tracing***, Tracing tracks the progression of a single user request as it is handled by other services that make up an application.  
 Each unit work is called a ***span*** in a ***trace***. Spans include metadata about the work, including the time spent in the step (latency), status, time events, attributes, links. You can use tracing to debug errors and latency issues in your applications.  
@@ -13,7 +13,12 @@ Each unit work is called a ***span*** in a ***trace***. Spans include metadata a
 
 ***span***, A span represents a single operation in a ***trace***. A span could be representative of an HTTP request, a remote procedure call (RPC), a database query, or even the path that a code takes in user code, etc. A ***span*** on its own is distinguishable by a unique 8 byte sequence called a `span-id` or `parent-id`.    
 
+***traceparent*** header, The *traceparent* header is composed by 4 sub-fields:
+`# version - trace-id - parent-id/span-id - traceflags`
+`00-480e22a2781fe54d992d878662248d94-b4b37b64bb3f6141-00`
+
 ![Trace](assets/trace-example.png)
+
 
 
 ---
@@ -72,13 +77,16 @@ The code file defines an Azure Function App that consists of four functions that
 ---
 
 ![W3C](assets/W3C-World-Wide-Web.png)
-## Trace Context
+## Trace Context W3C specification
 
 
 > ***Distributed tracing*** is a methodology implemented by tracing tools to follow, analyze and debug a transaction across multiple software components. Typically, a [*distributed trace*](#distrace) traverses more than one component which requires it to be uniquely identifiable across all participating systems. Trace context propagation passes along this unique identification.
 
 
 > <a name="distrace"></a> ***Distributed trace***, A distributed trace is a set of events, triggered as a result of a single logical operation, consolidated across various components of an application. A distributed trace contains events that cross process, network and security boundaries. A distributed trace may be initiated when someone presses a button to start an action on a website - in this example, the trace will represent calls made between the downstream services that handled the chain of requests initiated by this button being pressed.
+
+### Abstract
+This specification defines standard HTTP headers and a value format to propagate context information that enables **distributed tracing scenarios**. The specification standardizes how context information is sent and modified between services. Context information uniquely identifies individual requests in a distributed system and also defines a means to add and propagate provider-specific context information.
 
 
 ### The trace context standard
@@ -132,8 +140,6 @@ The ***traceparent*** field uses the Augmented Backus-Naur Form (ABNF) notation 
 
 [Log Analytics workspace overview](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-workspace-overview)
 <sub>A Log Analytics workspace is a unique environment for log data from Azure Monitor and other Azure services, such as Microsoft Sentinel and Microsoft Defender for Cloud. Each workspace has its own data repository and configuration but might combine data from multiple services.</sub>
-
-##### Azure
 
 [Azure Service Bus output binding for Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus-output?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cextensionv5&pivots=programming-language-python)
 
