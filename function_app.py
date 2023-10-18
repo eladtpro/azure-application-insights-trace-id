@@ -43,6 +43,35 @@ def start(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
     logging.info(f'[start] Python HTTP trigger function processed a request. next url')
     log_request(req, context)
     connection, headers = get_connection(req.url, dict(req.headers))
+
+    if 'traceparent' not in headers:
+        json_response = json.dumps({'error': 'traceparent header not found'})
+        logging.error(json_response)
+        return func.HttpResponse(
+                json_response,
+                mimetype="application/json",
+                status_code=406)
+
+    if 'x-appgw-trace-id' in headers:
+        tx = headers['x-appgw-trace-id']
+        traceparent = headers['traceparent']
+
+        parts = traceparent.split('-')
+        if len(parts) != 4:
+            json_response = json.dumps({'error': 'traceparent header is invalid'})
+            logging.error(json_response)
+            return func.HttpResponse(
+                    json_response,
+                    mimetype="application/json",
+                    status_code=406
+            )
+        if parts[1] != tx:
+            parts[1] = tx # => 00-{tx}-{trace_state}-01
+            headers['traceparent-original'] = headers['traceparent']
+            headers['traceparent'] = '-'.join(parts)
+            logging.info(f'UPDATE: {headers["traceparent-original"]} => {headers["traceparent"]}')
+
+    
     logging.info(f'START: {headers["traceparent"]}')
     connection.request('GET', '/api/enqueue', headers=headers)    
     res =  connection.getresponse()
@@ -100,26 +129,18 @@ def end(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
 
 def get_connection(url: str, headers: dict) -> http.client.HTTPConnection or http.client.HTTPSConnection:
     url_parts = urlparse(url)
-    if url_parts.scheme == 'http':
+    if url_parts.scheme == 'http': # validate scheme
         connection = http.client.HTTPConnection(url_parts.netloc)
     elif url_parts.scheme == 'https':
         connection = http.client.HTTPSConnection(url_parts.netloc)
-        # connection = http.client.HTTPSConnection('func-azure-monitor.azurewebsites.net')
     else:
         error = f'Error: {url_parts.scheme} is not supported'
         logging.error(error)
         return func.HttpResponse(error, status_code=400)
 
-    # remove auth headers
-    if 'authorization' in headers:
+    if 'authorization' in headers: # remove auth headers
         del headers['authorization']
     headers['Content-type'] = 'application/json'
-    
-    if 'traceparent' not in headers:
-        raise Exception('traceparent header not found')
-    else:
-        headers['traceparent-generated'] = headers['traceparent']
-
     return connection, headers
     
 

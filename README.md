@@ -1,23 +1,41 @@
 ![Azure Application Insights](assets/application-insights-wide.png)
-
-# Distributed tracing in action (a.k.a trace-context propagation)
+# Distributed tracing in-action (a.k.a trace-context propagation)
 
 
 ## Distributed tracing  
+![Distributed Tracing](assets/tracing_trace_spans.png)
+
 In this architecture, **the system is a chain of microservices**. Each microservice can fail independently for various reasons. When that happens, it's important to understand what happened so you can troubleshoot. It’s helpful to isolate an end-to-end transaction and follow the journey through the app stack, which consists of services or microservices. This method is called ***distributed tracing***.  
 
-***Tracing***, Tracing tracks the progression of a single user request as it is handled by other services that make up an application.  
+Tracing tracks the progression of a single user request as it is handled by other services that make up an application.  
 Each unit work is called a ***span*** in a ***trace***. Spans include metadata about the work, including the time spent in the step (latency), status, time events, attributes, links. You can use tracing to debug errors and latency issues in your applications.  
 
-***trace***, A ***trace*** is a tree of ***spans***. It is a collective of observable signals showing the path of work through a system. A ***trace*** on its own is distinguishable by a unique 16 byte sequence called a `trace-id`.
+***trace***, A ***trace*** is a tree of ***spans***. It is a collective of observable signals showing the path of work through a system.  
+A ***trace*** on its own is distinguishable by a unique 16 byte sequence called a `trace-id`.
 
-***span***, A span represents a single operation in a ***trace***. A span could be representative of an HTTP request, a remote procedure call (RPC), a database query, or even the path that a code takes in user code, etc. A ***span*** on its own is distinguishable by a unique 8 byte sequence called a `span-id` or `parent-id`.    
+***span***, A span represents a single operation in a ***trace***. A span could be representative of an **HTTP request**, a **remote procedure call (RPC)**, a **database query** etc.  
+A ***span*** on its own is distinguishable by a unique 8 byte sequence called a `span-id` or `parent-id`.    
 
-***traceparent*** header, The *traceparent* header is composed by 4 sub-fields:
-`# version - trace-id - parent-id/span-id - traceflags`
-`00-480e22a2781fe54d992d878662248d94-b4b37b64bb3f6141-00`
+***traceparent*** header, The *traceparent* header uses the Augmented Backus-Naur Form (ABNF) notation of [RFC5234](https://www.w3.org/TR/trace-context/#bib-rfc5234) and is composed by 4 sub-fields:
 
-![Trace](assets/trace-example.png)
+```
+# version - trace-id - parent-id/span-id - traceflags  
+
+00-480e22a2781fe54d992d878662248d94-b4b37b64bb3f6141-00
+```
+
+***version*** (8-bit): trace context version that the system has adopted. The current is 00.
+
+***trace-id*** (16-byte array): the ID of the whole trace. It's used to identify a distributed trace globally through a system.
+
+***parent-id*** or ***span-id*** (8-byte array): used to identify the parent of the current span on incoming requests or the current span on an outgoing request.
+
+***trace-flags*** (8-bit): flags that represent recommendations of the caller. Can be also thought as the caller recommendations and are strict to three reasons: trust and abuse, bug in the caller or different load between caller and callee service.
+
+> NOTE: all the fields are encoded as hexadecimal
+
+
+<!-- ![Trace](assets/trace-example.png) -->
 
 
 
@@ -26,7 +44,7 @@ Each unit work is called a ***span*** in a ***trace***. Spans include metadata a
 
 ## Scenario  
 
-Azure APM Application Insights Service end-to-end transactions
+Azure APM Application Insights Service end-to-end transaction.
 
 
 #### Azure Resources: 
@@ -77,7 +95,7 @@ The code file defines an Azure Function App that consists of four functions that
 ---
 
 ![W3C](assets/W3C-World-Wide-Web.png)
-## Trace Context W3C specification
+## Appendix: Trace Context W3C specification
 
 
 > ***Distributed tracing*** is a methodology implemented by tracing tools to follow, analyze and debug a transaction across multiple software components. Typically, a [*distributed trace*](#distrace) traverses more than one component which requires it to be uniquely identifiable across all participating systems. Trace context propagation passes along this unique identification.
@@ -88,33 +106,29 @@ The code file defines an Azure Function App that consists of four functions that
 ### Abstract
 This specification defines standard HTTP headers and a value format to propagate context information that enables **distributed tracing scenarios**. The specification standardizes how context information is sent and modified between services. Context information uniquely identifies individual requests in a distributed system and also defines a means to add and propagate provider-specific context information.
 
+### Problem Statement
+
+The problem of distributed tracing in modern, highly distributed applications and the need for a standardized solution. In the past, most applications were monitored by a single tracing vendor and stayed within a single platform provider's boundaries.  
+However, as applications become more distributed and leverage multiple middleware services and cloud platforms, the lack of a common standard for trace context propagation has created interoperability issues.  
+
+### Solution Space
+The proposed solution is the [trace context specification](https://www.w3.org/TR/trace-context/), which defines a universally agreed-upon format for exchanging trace context propagation data.  
+This trace context solves several problems by providing a unique identifier for traces and requests, enabling the linking of trace data from multiple providers. It also offers a mechanism to forward vendor-specific trace data and establishes an industry standard that intermediaries, platforms, and hardware providers can support. This standardized approach enhances visibility into the behavior of distributed applications, aiding in problem diagnosis and performance analysis. Interoperability is essential for managing modern microservices-based applications.  
+
+Tracing tools can behave in two ways: They must at least propagate the ***traceparent*** and ***tracestate*** headers to ensure trace continuity (forwarding a trace). They can also choose to participate in a trace by modifying these headers with proprietary information (participating in a trace). The behavior of tracing tools can vary for each individual request they monitor.
+
 
 ### The trace context standard
 The [W3C Trace Context](https://www.w3.org/TR/trace-context/) specification defines a standard to HTTP headers and formats to propagate the distributed tracing context information. It defines two fields that should be propagated in the http request's header throughout the trace flow. Take a look below at the standard definition of each field:
+
+The trace context is split into two parts: "traceparent," which describes the position of incoming requests in the trace graph, and "tracestate," which extends traceparent with vendor-specific data in the form of name/value pairs.
+
+
 
 * ***traceparent***: ***traceparent*** describes the position of the incoming request in its trace graph in a portable, fixed-length format. Its design focuses on fast parsing. Every tracing tool MUST properly set ***traceparent*** even when it only relies on vendor-specific information in tracestate
 
 
 * ***tracestate***: extends traceparent with vendor-specific data represented by a set of name/value pairs. Storing information in tracestate is optional.
-
-#### The ***traceparent*** field
-The ***traceparent*** field uses the Augmented Backus-Naur Form (ABNF) notation of [RFC5234](https://www.w3.org/TR/trace-context/#bib-rfc5234) and is composed by 4 sub-fields:
-
-```
-# version - trace-id - parent-id/span-id - traceflags
-
-00-480e22a2781fe54d992d878662248d94-b4b37b64bb3f6141-00
-```
-
-***version*** (8-bit): trace context version that the system has adopted. The current is 00.
-
-***trace-id*** (16-byte array): the ID of the whole trace. It's used to identify a distributed trace globally through a system.
-
-***parent-id*** or ***span-id*** (8-byte array): used to identify the parent of the current span on incoming requests or the current span on an outgoing request.
-
-***trace-flags*** (8-bit): flags that represent recommendations of the caller. Can be also thought as the caller recommendations and are strict to three reasons: trust and abuse, bug in the caller or different load between caller and callee service.
-
-> NOTE: all the fields are encoded as hexadecimal
 
 
 ---
@@ -150,10 +164,12 @@ The ***traceparent*** field uses the Augmented Backus-Naur Form (ABNF) notation 
 [Azure Functions Python developer guide](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=asgi%2Capplication-level&pivots=python-mode-decorators)
 <sub>This guide is an introduction to developing Azure Functions by using Python.</sub>
 
-##### W3C  
+##### Standarts  
 
 [W3C Trace Context](https://www.w3.org/TR/trace-context/#trace-id)
 
+[OpenTelemetry Concepts](https://opentelemetry.io/docs/concepts/)
+<sub>data sources and key components of the OpenTelemetry project</sub>
 
 ##### Python and 3rd Party
 [OpenCensus - Tracing](https://opencensus.io/tracing/)
@@ -167,7 +183,7 @@ The ***traceparent*** field uses the Augmented Backus-Naur Form (ABNF) notation 
 [Lelis Dev - trace context](https://luizlelis.com/blog/tracecontext)
 <sub>Using W3C Trace Context standard in distributed tracing</sub>
 
-
+[WaveFront Distributed Tracing Key Concepts](https://docs.wavefront.com/trace_data_details.html)
 
 
 
