@@ -2,7 +2,14 @@
 # Distributed tracing in-action (a.k.a trace-context propagation)
 
 
-## Distributed tracing  
+## In this article
+[What is distributed tracing](#what)  
+[Scenario - trace in action](#scenario)  
+[W3C: Trace Context specification](#spec)  
+[Further Reading](#further)  
+
+
+## <a name="what"></a>What is distributed tracing  
 ![Distributed Tracing](assets/tracing_trace_spans.png)
 
 In this architecture, **the system is a chain of microservices**. Each microservice can fail independently for various reasons. When that happens, it's important to understand what happened so you can troubleshoot. It’s helpful to isolate an end-to-end transaction and follow the journey through the app stack, which consists of services or microservices. This method is called ***distributed tracing***.  
@@ -34,20 +41,18 @@ A ***span*** on its own is distinguishable by a unique 8 byte sequence called a 
 
 > NOTE: all the fields are encoded as hexadecimal
 
-
 <!-- ![Trace](assets/trace-example.png) -->
-
 
 
 ---
 
 
-## Scenario  
+## <a name="scenario"></a>Scenario - trace in action  
 
 Azure APM Application Insights Service end-to-end transaction.
 
 
-#### Azure Resources: 
+### Azure Resources: 
 Functions, Service Bus queue, Applciation Insights, and Log Analytics Workspace
 
 ***Azure Function Service***: Azure Functions is an event-driven, serverless compute platform that helps you develop more efficiently using the programming language of your choice. Focus on core business logic with the highest level of hardware abstraction.  
@@ -62,11 +67,15 @@ Functions, Service Bus queue, Applciation Insights, and Log Analytics Workspace
 ![Flow](assets/flow.png)
 
 
-#### The Flow
+### The Flow
 
 The code file defines an Azure Function App that consists of four functions that handle both Service Bus queues and HTTP requests:  
 
-***start***: This function is triggered by an HTTP request with the route /start. It logs the request and then makes a GET request to another endpoint with the same headers.  
+***start***: This function is triggered by an HTTP request with the route /start. It logs the request and then makes a GET request to another endpoint with the same headers. 
+start phase also injects the Azure Application Gateway transaction header into the ***traceparent*** header:  
+`version-trace-id-span-id-traceflags`
+into
+`version-x_appgw_trace_id-span-id-traceflags`
 
 ***enqueue***: This function is triggered by an HTTP request with the route /enqueue. It logs the request and then sends a message to an Azure Service Bus queue.  
 
@@ -83,7 +92,7 @@ The code file defines an Azure Function App that consists of four functions that
 ---
 
 
-## Test
+### Test
 
 ##### Trace Headers
 ***traceparent***: `00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01`
@@ -95,7 +104,7 @@ The code file defines an Azure Function App that consists of four functions that
 ---
 
 ![W3C](assets/W3C-World-Wide-Web.png)
-## Appendix: Trace Context W3C specification
+## <a name="spec"></a>W3C: Trace Context specification
 
 
 > ***Distributed tracing*** is a methodology implemented by tracing tools to follow, analyze and debug a transaction across multiple software components. Typically, a [*distributed trace*](#distrace) traverses more than one component which requires it to be uniquely identifiable across all participating systems. Trace context propagation passes along this unique identification.
@@ -134,7 +143,7 @@ The trace context is split into two parts: "traceparent," which describes the po
 ---
 
 
-## Further Reading
+## <a name="further">Further Reading
 
 ##### Microsoft learn
 
