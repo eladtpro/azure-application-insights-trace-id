@@ -1,43 +1,43 @@
-![Azure Application Insights](assets/application-insights-wide.png)
+![Azure Application Insights](assets/application-map.png)
 # Distributed tracing in-action (a.k.a trace-context propagation)
 
 
 ## In this article
-[What is distributed tracing](#what)  
+[Distributed tracing in a nutshell](#what)  
 [Scenario - trace in action](#scenario)  
 [W3C: Trace Context specification](#spec)  
 [Further Reading](#further)  
 
 
-## <a name="what"></a>What is distributed tracing  
+## <a name="what"></a>Distributed tracing in a nutshell  
 ![Distributed Tracing](assets/tracing_trace_spans.png)
 
-In this architecture, **the system is a chain of microservices**. Each microservice can fail independently for various reasons. When that happens, it's important to understand what happened so you can troubleshoot. It’s helpful to isolate an end-to-end transaction and follow the journey through the app stack, which consists of services or microservices. This method is called ***distributed tracing***.  
+Microservices architecture comes with challenges, including the complexity of troubleshooting failures of each microservice over a distributed system composed of a chain of microservices.  
 
-Tracing tracks the progression of a single user request as it is handled by other services that make up an application.  
-Each unit work is called a ***span*** in a ***trace***. Spans include metadata about the work, including the time spent in the step (latency), status, time events, attributes, links. You can use tracing to debug errors and latency issues in your applications.  
+*Distributed tracing* helps isolate a specific user transaction and track its journey through the application stack.  
 
-***trace***, A ***trace*** is a tree of ***spans***. It is a collective of observable signals showing the path of work through a system.  
-A ***trace*** on its own is distinguishable by a unique 16 byte sequence called a `trace-id`.
 
-***span***, A span represents a single operation in a ***trace***. A span could be representative of an **HTTP request**, a **remote procedure call (RPC)**, a **database query** etc.  
-A ***span*** on its own is distinguishable by a unique 8 byte sequence called a `span-id` or `parent-id`.    
+***Trace***: A ***trace*** is a tree of ***spans***. It is a collective of observable signals showing the path of work through a system.  
+A ***trace*** is distinguishable by a unique 16-byte sequence called a `trace-id`.  
 
-***traceparent*** header, The *traceparent* header uses the Augmented Backus-Naur Form (ABNF) notation of [RFC5234](https://www.w3.org/TR/trace-context/#bib-rfc5234) and is composed by 4 sub-fields:
+***Span***: A span represents a single operation in a ***trace***. A span could describe an HTTP request, a remote procedure call (RPC), a database query, etc.  
+A ***span*** is distinguishable by a unique 8-byte sequence called a `span-id` or `parent-id`.  
+
+***traceparent*** header, The *traceparent* header uses the Augmented Backus-Naur Form (ABNF) notation of [RFC5234](https://www.w3.org/TR/trace-context/#bib-rfc5234) and is composed of four sub-fields:  
 
 ```
-# version - trace-id - parent-id/span-id - traceflags  
+# version - trace-id - span-id - traceflags  
 
 00-480e22a2781fe54d992d878662248d94-b4b37b64bb3f6141-00
 ```
 
-***version*** (8-bit): trace context version that the system has adopted. The current is 00.
+* ***version*** (8-bit): trace context version that the system has adopted. The current is 00.
 
-***trace-id*** (16-byte array): the ID of the whole trace. It's used to identify a distributed trace globally through a system.
+* ***trace-id*** (16-byte array): the ID of the whole trace. It's used to identify a distributed trace globally through a system.
 
-***parent-id*** or ***span-id*** (8-byte array): used to identify the parent of the current span on incoming requests or the current span on an outgoing request.
+* ***parent-id*** or ***span-id*** (8-byte array): used to identify the parent of the current span on incoming requests or the current span on an outgoing request.
 
-***trace-flags*** (8-bit): flags that represent recommendations of the caller. Can be also thought as the caller recommendations and are strict to three reasons: trust and abuse, bug in the caller or different load between caller and callee service.
+* ***trace-flags*** (8-bit): flags that represent recommendations of the caller. They can also be considered the caller's recommendations and are strict for three reasons: trust and abuse, bugs in the caller, or different load between caller and callee service.
 
 > NOTE: all the fields are encoded as hexadecimal
 
@@ -45,6 +45,11 @@ A ***span*** on its own is distinguishable by a unique 8 byte sequence called a 
 
 
 ---
+
+![Application Insights](assets/app-insights.png)
+![Service Bus](assets/ServiceBus.png)
+![Function App](assets/functions-logo.png)
+![Log Analytics Workspace](assets/log-analytics.png)
 
 
 ## <a name="scenario"></a>Scenario - trace in action  
@@ -145,7 +150,7 @@ The trace context is split into two parts: "traceparent," which describes the po
 
 ## <a name="further">Further Reading
 
-##### Microsoft learn
+### Microsoft learn
 
 [Configure App Service with Application Gateway](https://learn.microsoft.com/en-us/azure/application-gateway/configure-web-app?tabs=defaultdomain%2Cazure-portal)
 <sub>Application gateway allows you to have an App Service app or other multi-tenant service as a backend pool member. In this article, you learn to configure an App Service app with Application Gateway</sub>
@@ -154,35 +159,43 @@ The trace context is split into two parts: "traceparent," which describes the po
 <sub>Azure Monitor Application Insights, a feature of [Azure Monitor](https://learn.microsoft.com/en-us/azure/azure-monitor/overview), excels in Application Performance Management (APM) for live web applications.</sub>
 
 
-[Azure Service Bus output binding for Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus-output?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cextensionv5&pivots=programming-language-python)
-
+[Azure Service Bus output binding for Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus-output?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cextensionv5&pivots=programming-language-python)  
+<sub>Use Azure Service Bus output binding to send queue or topic messages.</sub>
 
 [Tutorial: Use identity-based connections instead of secrets with triggers and bindings](https://learn.microsoft.com/en-us/azure/azure-functions/functions-identity-based-connections-tutorial-2)
 
-[host.json settings](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus?tabs=isolated-process%2Cfunctionsv2%2Cextensionv3&pivots=programming-language-python#hostjson-settings)
+[host.json settings](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus?tabs=isolated-process%2Cfunctionsv2%2Cextensionv3&pivots=programming-language-python#hostjson-settings)  
+<sub>This section describes the configuration settings available for this binding, which depends on the runtime and extension version.</sub>  
 
-[Monitor a distributed system by using Application Insights and OpenCensus](https://learn.microsoft.com/en-us/azure/architecture/guide/devops/monitor-with-opencensus-application-insights)
-<sub>This article describes a distributed system that's created with Azure Functions, Azure Event Hubs, and Azure Service Bus. It provides details about how to monitor the end-to-end system by using [OpenCensus for Python](https://github.com/census-instrumentation/opencensus-python) and Application Insights. This article also introduces distributed tracing and explains how it works by using Python code examples. The fictional company, Contoso, is used in the architecture to help describe the scenario.</sub>
-
-[Log Analytics workspace overview](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-workspace-overview)
+[Log Analytics workspace overview](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-workspace-overview)  
 <sub>A Log Analytics workspace is a unique environment for log data from Azure Monitor and other Azure services, such as Microsoft Sentinel and Microsoft Defender for Cloud. Each workspace has its own data repository and configuration but might combine data from multiple services.</sub>
 
-[Azure Service Bus output binding for Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus-output?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cextensionv5&pivots=programming-language-python)
+[Azure Service Bus output binding for Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus-output?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cextensionv5&pivots=programming-language-python)  
 
 
-[Azure Functions Python developer guide](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=asgi%2Capplication-level&pivots=python-mode-decorators)
+[Azure Functions Python developer guide](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=asgi%2Capplication-level&pivots=python-mode-decorators)  
 <sub>This guide is an introduction to developing Azure Functions by using Python.</sub>
 
-##### Standarts  
+### Standarts  
 
-[W3C Trace Context](https://www.w3.org/TR/trace-context/#trace-id)
+[W3C Trace Context](https://www.w3.org/TR/trace-context/#trace-id)  
 
-[OpenTelemetry Concepts](https://opentelemetry.io/docs/concepts/)
-<sub>data sources and key components of the OpenTelemetry project</sub>
+[OpenTelemetry Concepts](https://opentelemetry.io/docs/concepts/)  
+<sub>Data sources and key components of the OpenTelemetry project</sub>
 
-##### Python and 3rd Party
-[OpenCensus - Tracing](https://opencensus.io/tracing/)
-<sub>Tracing tracks the progression of a single user request as it is handled by other services that make up an application.</sub>
+[Grafana: A beginner's guide to distributed tracing and how it can increase an application's performance](https://grafana.com/blog/2021/01/25/a-beginners-guide-to-distributed-tracing-and-how-it-can-increase-an-applications-performance/)  
+<sub>Outline of the basics around distributed tracing. Along with explaining how tracing works, we also address why developers should work to incorporate distributed tracing into their applications and how investing the money and time to build the infrastructure and install the code for tracing can increase an application’s performance.</sub>  
+
+[What is distributed tracing and telemetry correlation?](https://learn.microsoft.com/en-us/azure/azure-monitor/app/distributed-tracing-telemetry-correlation)  
+<sub>Modern cloud and [microservices](https://azure.com/microservices) architectures have enabled simple, independently deployable services that reduce costs while increasing availability and throughput. However, it has made overall systems more difficult to reason about and debug. Distributed tracing solves this problem by providing a performance profiler that works like call stacks for cloud and microservices architectures.</sub>
+
+
+### Python and 3rd Party
+[OpenCensus - Tracing](https://opencensus.io/tracing/)  
+<sub>Tracing tracks the progression of a single user request as it is handled by other services that make up an application.</sub>  
+
+[Monitor a distributed system by using Application Insights and OpenCensus](https://learn.microsoft.com/en-us/azure/architecture/guide/devops/monitor-with-opencensus-application-insights)  
+<sub>This article describes a distributed system that's created with Azure Functions, Azure Event Hubs, and Azure Service Bus. It provides details about how to monitor the end-to-end system by using [OpenCensus for Python](https://github.com/census-instrumentation/opencensus-python) and Application Insights. This article also introduces distributed tracing and explains how it works by using Python code examples. The fictional company, Contoso, is used in the architecture to help describe the scenario.</sub>  
 
 [Monitor a distributed system by using Application Insights and OpenCensus](https://learn.microsoft.com/en-us/azure/architecture/guide/devops/monitor-with-opencensus-application-insights)
 <sub>This article describes a distributed system that's created with Azure Functions, Azure Event Hubs, and Azure Service Bus. It provides details about how to monitor the end-to-end system by using [OpenCensus for Python](https://github.com/census-instrumentation/opencensus-python) and Application Insights. This article also introduces distributed tracing and explains how it works by using Python code examples. The fictional company, Contoso, is used in the architecture to help describe the scenario.</sub>
