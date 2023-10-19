@@ -46,16 +46,15 @@ A ***span*** is distinguishable by a unique 8-byte sequence called a `span-id` o
 
 ---
 
+
+## <a name="scenario"></a>Scenario - trace in action  
+
 ![Application Insights](assets/app-insights.png)
 ![Service Bus](assets/ServiceBus.png)
 ![Function App](assets/function-app.png)
 ![Log Analytics Workspace](assets/log-analytics.png)
 
-
-## <a name="scenario"></a>Scenario - trace in action  
-
-Azure APM Application Insights Service end-to-end transaction.
-
+Application Performance Monitoring (APM) with Azure Monitor Application Insights end-to-end transaction.
 
 ### Azure Resources: 
 Functions, Service Bus queue, Applciation Insights, and Log Analytics Workspace
