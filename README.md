@@ -48,7 +48,7 @@ A ***span*** is distinguishable by a unique 8-byte sequence called a `span-id` o
 
 ![Application Insights](assets/app-insights.png)
 ![Service Bus](assets/ServiceBus.png)
-![Function App](assets/functions-logo.png)
+![Function App](assets/function-app.png)
 ![Log Analytics Workspace](assets/log-analytics.png)
 
 
