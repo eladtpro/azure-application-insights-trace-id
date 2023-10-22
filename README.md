@@ -49,14 +49,14 @@ A ***span*** is distinguishable by a unique 8-byte sequence called a `span-id` o
 
 ## <a name="scenario"></a>Scenario - trace in action  
 
-![Application Insights](assets/app-insights.png)
-![Service Bus](assets/ServiceBus.png)
-![Function App](assets/function-app.png)
-![Log Analytics Workspace](assets/log-analytics.png)
-
 Application Performance Monitoring (APM) with Azure Monitor Application Insights end-to-end transaction.
 
-### Azure Resources: 
+### Azure Resources:  
+![Application Insights](assets/app-insights.png)  
+![Service Bus](assets/ServiceBus.png)  
+![Function App](assets/function-app.png)  
+![Log Analytics Workspace](assets/log-analytics.png)  
+
 Functions, Service Bus queue, Applciation Insights, and Log Analytics Workspace
 
 ***Azure Function Service***: Azure Functions is an event-driven, serverless compute platform that helps you develop more efficiently using the programming language of your choice. Focus on core business logic with the highest level of hardware abstraction.  
@@ -146,10 +146,24 @@ The trace context is split into two parts: "traceparent," which describes the po
 
 ---
 
+## Azure Web Application Firewall on Azure Application Gateway - Overriding transaction-id (Optional)
+
+![Azure Web Application Firewall on Azure Application Gateway - override headers](assets/header-rewrite-overview.png)
+In some cases we want to override the [*traceparent header*](https://www.w3.org/TR/trace-context/#traceparent-header) so its value will fit our internal transaction-id, in this section we will use Azure Web Application Firewall (WAF) which is a gateway for all incoming requests,  to overide the transaction-id.   
+Application Gateway allows you to rewrite selected content of requests and responses. With this feature, you can translate URLs, query string parameters as well as modify request and response headers. It also allows you to add conditions to ensure that the URL or the specified headers are rewritten only when certain conditions are met. These conditions are based on the request and response information.
+
+
+for this case we will use Azure Application Gateway rewrite set,
+In this rule we will create new traceparent header with the Azure AGW builtin transaction request header "xappgw-trace-id":
+
+![Header rewrite rule set](assets/update-rewrite-set.png)
+
+
+---
 
 ## <a name="further">Further Reading
 
-### Microsoft learn
+### Azure  
 
 [Configure App Service with Application Gateway](https://learn.microsoft.com/en-us/azure/application-gateway/configure-web-app?tabs=defaultdomain%2Cazure-portal)
 <sub>Application gateway allows you to have an App Service app or other multi-tenant service as a backend pool member. In this article, you learn to configure an App Service app with Application Gateway</sub>
@@ -201,10 +215,17 @@ The trace context is split into two parts: "traceparent," which describes the po
 
 [OpenTelemetry Python](https://github.com/open-telemetry/opentelemetry-python)
 
-[Lelis Dev - trace context](https://luizlelis.com/blog/tracecontext)
+[Lelis Dev - trace context](https://luizlelis.com/blog/tracecontext)  
 <sub>Using W3C Trace Context standard in distributed tracing</sub>
 
-[WaveFront Distributed Tracing Key Concepts](https://docs.wavefront.com/trace_data_details.html)
+[WaveFront Distributed Tracing Key Concepts](https://docs.wavefront.com/trace_data_details.html)  
+<sub>Get to know the concepts around distributed tracing.</sub>
 
+[Azure Functions Python developer guide](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=asgi%2Capplication-level&pivots=python-mode-decorators)  
+<sub>This guide is an introduction to developing Azure Functions by using Python. The article assumes that you've already read the [Azure Functions developers guide](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference).</sub>
+
+[Set up Azure Monitor for your Python application](https://learn.microsoft.com/en-us/previous-versions/azure/azure-monitor/app/opencensus-python)  
+<sub>Azure Monitor supports distributed tracing, metric collection, and logging of Python applications.  
+Microsoft's supported solution for tracking and exporting data for your Python applications is through the [OpenCensus Python SDK](https://learn.microsoft.com/en-us/previous-versions/azure/azure-monitor/app/opencensus-python#introducing-opencensus-python-sdk) via the [Azure Monitor exporters](https://learn.microsoft.com/en-us/previous-versions/azure/azure-monitor/app/opencensus-python#instrument-with-opencensus-python-sdk-with-azure-monitor-exporters).</sub>
 
 
