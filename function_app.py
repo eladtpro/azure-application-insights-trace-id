@@ -67,7 +67,7 @@ def start(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
             )
         if parts[1] != tx:
             parts[1] = tx # => 00-{tx}-{trace_state}-01
-            headers['traceparent-original'] = headers['traceparent']
+            headers['traceparent-original'] = traceparent
             headers['traceparent'] = '-'.join(parts)
             logging.info(f'UPDATE: {headers["traceparent-original"]} => {headers["traceparent"]}')
 
