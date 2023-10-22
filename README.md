@@ -69,10 +69,9 @@ Functions, Service Bus queue, Applciation Insights, and Log Analytics Workspace
 ***Azure Log Analytics Workspace***: A Log Analytics workspace is a unique environment for log data from Azure Monitor and other Azure services, such as Microsoft Sentinel and Application Insights. Each workspace has its own data repository and configuration but might combine data from multiple services.  
 
 
-![Flow](assets/flow.png)
-
-
 ### The Flow
+
+![Flow](assets/flow.png)
 
 The code file defines an Azure Function App that consists of four functions that handle both Service Bus queues and HTTP requests:  
 
