@@ -6,6 +6,7 @@
 [Distributed tracing in a nutshell](#what)  
 [Scenario - trace in action](#scenario)  
 [W3C: Trace Context specification](#spec)  
+[Azure Web Application Firewall on Azure Application Gateway - Overriding transaction-id (Optional)](#waf)
 [Further Reading](#further)  
 
 
@@ -52,10 +53,10 @@ A ***span*** is distinguishable by a unique 8-byte sequence called a `span-id` o
 Application Performance Monitoring (APM) with Azure Monitor Application Insights end-to-end transaction.
 
 ### Azure Resources:  
-![Application Insights](assets/app-insights.png)  
-![Service Bus](assets/ServiceBus.png)  
-![Function App](assets/function-app.png)  
-![Log Analytics Workspace](assets/log-analytics.png)  
+![Application Insights](assets/app-insights.png)
+![Service Bus](assets/ServiceBus.png)
+![Function App](assets/function-app.png)
+![Log Analytics Workspace](assets/log-analytics.png)
 
 Functions, Service Bus queue, Applciation Insights, and Log Analytics Workspace
 
@@ -146,7 +147,7 @@ The trace context is split into two parts: "traceparent," which describes the po
 
 ---
 
-## Azure Web Application Firewall on Azure Application Gateway - Overriding transaction-id (Optional)
+## <a name="waf"></a>Azure Web Application Firewall on Azure Application Gateway - Overriding transaction-id (Optional)
 
 ![Azure Web Application Firewall on Azure Application Gateway - override headers](assets/header-rewrite-overview.png)
 In some cases we want to override the [*traceparent header*](https://www.w3.org/TR/trace-context/#traceparent-header) so its value will fit our internal transaction-id, in this section we will use Azure Web Application Firewall (WAF) which is a gateway for all incoming requests,  to overide the transaction-id.   
