@@ -53,9 +53,9 @@ A ***span*** is distinguishable by a unique 8-byte sequence called a `span-id` o
 Application Performance Monitoring (APM) with Azure Monitor Application Insights end-to-end transaction.
 
 ### Azure Resources:  
-![Application Insights](assets/app-insights.png)
-![Service Bus](assets/ServiceBus.png)
 ![Function App](assets/function-app.png)
+![Service Bus](assets/ServiceBus.png)
+![Application Insights](assets/app-insights.png)
 ![Log Analytics Workspace](assets/log-analytics.png)
 
 Functions, Service Bus queue, Applciation Insights, and Log Analytics Workspace
@@ -173,6 +173,8 @@ In this rule we will create new traceparent header with the Azure AGW builtin tr
 <sub>A Log Analytics workspace is a unique environment for log data from Azure Monitor and other Azure services, such as Microsoft Sentinel and Microsoft Defender for Cloud. Each workspace has its own data repository and configuration but might combine data from multiple services.</sub>
 
 ### Azure Microservices
+
+[Microservices on Azure](https://azure.microsoft.com/en-us/solutions/microservice-applications/)
 
 [Azure Service Bus output binding for Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus-output?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cextensionv5&pivots=programming-language-python)  
 <sub>Use Azure Service Bus output binding to send queue or topic messages.</sub>
